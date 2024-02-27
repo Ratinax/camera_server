@@ -1,17 +1,14 @@
 from flask import Flask, render_template, Response, request, jsonify
 import cv2
-import threading
 import ssl
 import string
 from random import randint
 
 app = Flask(__name__)
 
-# Utilisez le chemin vers vos certificats SSL/TLS
 context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
 context.load_cert_chain('cert.pem', 'key.pem')
 
-# Mot de passe à vérifier (changez-le selon vos besoins)
 correct_password = "bonjour"
 cap = cv2.VideoCapture(0)
 client = {}
@@ -41,19 +38,19 @@ def index():
 @app.route('/video_feed')
 def video_feed():
     print(request.cookies["sessionCookie"])
-    if request.url in client and client[request.url] == request.cookies["sessionCookie"]:
+    print(client)
+    if request.remote_addr in client and client[request.remote_addr] == request.cookies["sessionCookie"]:
         return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame', content_type='multipart/x-mixed-replace; boundary=frame')
     return None
 
 @app.route('/check_password', methods=['POST'])
 def check_password():
-    # client_url = request.url
     data = request.get_json()
     password = data.get('password', '')
     valid = password == correct_password
     if valid:
         session = getRandomString()
-        client[request.url] = session
+        client[request.remote_addr] = session
         response = jsonify(valid=valid)
         response.set_cookie('sessionCookie', session, httponly=True)
         return response
@@ -61,5 +58,4 @@ def check_password():
         return jsonify(valid=valid)
 
 if __name__ == "__main__":
-    # Utilisez un port et un hôte appropriés
     app.run(host='0.0.0.0', port=5000, ssl_context=context, threaded=True)
