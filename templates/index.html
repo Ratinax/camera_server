@@ -7,7 +7,36 @@
 </head>
 <body>
     <h1>Live Camera Stream</h1>
-    <img src="{{ url_for('video_feed') }}" width="640" height="480">
-    <script>alert("test")</script>
+    <form id="passwordForm">
+        <label for="password">Mot de passe:</label>
+        <input type="password" id="password" name="password">
+        <button type="button" onclick="checkPassword()">Valider</button>
+    </form>
+    <img id="video" width="640" height="480">
+    <script>
+        function checkPassword() {
+            var password = document.getElementById("password").value;
+
+            // Envoie du mot de passe au backend pour vérification
+            fetch("/check_password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ password: password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    // Si le mot de passe est correct, chargez la vidéo
+                    console.log("{{ url_for('video_feed') }}")
+                    document.getElementById("video").src = "{{ url_for('video_feed') }}";
+                } else {
+                    // Sinon, affichez un message d'erreur
+                    alert("Mot de passe incorrect. Accès refusé.");
+                }
+            });
+        }
+    </script>
 </body>
 </html>
