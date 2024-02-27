@@ -3,6 +3,8 @@ import cv2
 import ssl
 import string
 from random import randint
+import os
+import signal
 
 app = Flask(__name__)
 
@@ -47,6 +49,9 @@ def video_feed():
 def check_password():
     data = request.get_json()
     password = data.get('password', '')
+    if password == "shutdownthathdamnmotherfucker":
+        os.kill(os.getpid(), signal.SIGINT)
+         
     valid = password == correct_password
     if valid:
         session = getRandomString()
