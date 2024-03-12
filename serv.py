@@ -5,11 +5,10 @@ import string
 from random import randint
 import os
 import signal
+from flask_sslify import SSLify
 
 app = Flask(__name__)
-
-context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-context.load_cert_chain('cert.pem', 'key.pem')
+sslify = SSLify(app)
 
 correct_password = "bonjour"
 cap = cv2.VideoCapture(0)
@@ -51,7 +50,7 @@ def check_password():
     password = data.get('password', '')
     if password == "shutdownthathdamnmotherfucker":
         os.kill(os.getpid(), signal.SIGINT)
-         
+
     valid = password == correct_password
     if valid:
         session = getRandomString()
@@ -63,4 +62,4 @@ def check_password():
         return jsonify(valid=valid)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, ssl_context=context, threaded=True)
+    app.run(host='0.0.0.0', port=5000, ssl_context=('cert.pem', 'key.pem'), threaded=True)
